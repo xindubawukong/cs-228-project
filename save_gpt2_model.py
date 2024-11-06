@@ -19,7 +19,7 @@ class GPT2Wrapper(torch.nn.Module):
 gpt2 = GPT2LMHeadModel.from_pretrained('gpt2')
 gpt2_wrapped = GPT2Wrapper(gpt2)
 traced_model = torch.jit.trace(gpt2_wrapped, example_inputs=torch.randint(0, 50257, (1, 20)))
-traced_model.save('model/traced_gpt2_model.pt')
+traced_model.save('model/gpt2_model.pt')
 
 gpt2.config.to_json_file('model/gpt2_config.json')
 

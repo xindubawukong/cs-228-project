@@ -21,8 +21,9 @@ include_directories(
 
 add_compile_options(
   # -O3
+  -march=native
   -Wall -Wextra
 )
 
-add_executable(temp temp.cpp)
-target_link_libraries(temp "${TORCH_LIBRARIES}")
+add_executable(gpt2 gpt2.cpp)
+target_link_libraries(gpt2 "${TORCH_LIBRARIES}")

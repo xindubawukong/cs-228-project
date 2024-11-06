@@ -1,10 +1,39 @@
 
-## Requirements
+## Usage
 
-- libtorch
-  - Download from https://download.pytorch.org/libtorch/cpu/libtorch-shared-with-deps-2.5.1%2Bcpu.zip
-  - Put libtorch at `third_party/libtorch`
+### Download the Repo
 
+```
+git clone --recurse-submodules git@github.com:xindubawukong/cs-228-project.git
+```
+
+### Download libtorch
+
+Download from https://download.pytorch.org/libtorch/cpu/libtorch-shared-with-deps-2.5.1%2Bcpu.zip
+
+Put libtorch at `third_party/libtorch`
+
+### Save GPT2 Model
+
+```
+python3 save_gpt2_model.py
+```
+
+This will save parameters to `model/gpt2_model.pt` and config to `model/gpt2_config.json`.
+
+### Run GPT2 in C++
+
+```
+mkdir -p build && cd build
+cmake ..
+make
+./gpt2
+```
+
+It will read model parameters from the saved files.
+
+
+<!-- 
 
 The error you're encountering is caused by `torch.jit.script` trying to script a Hugging Face model that internally uses certain Python-specific constructs (like `_lru_cache_wrapper`), which are not compatible with TorchScript. The Hugging Face models, such as `GPT2LMHeadModel`, often include features that TorchScript cannot script directly due to dynamic attributes or caching mechanisms that TorchScript does not support.
 
@@ -129,4 +158,4 @@ This approach effectively bypasses the limitations of `None` handling in `torch.
 - Splitting the model logic into two functions: one for the initial pass and one for cached passes.
 - Tracing each function separately and managing the `past_key_values` state in the application code. 
 
-This should avoid errors while enabling efficient generation with cached states in LibTorch.
+This should avoid errors while enabling efficient generation with cached states in LibTorch. -->
