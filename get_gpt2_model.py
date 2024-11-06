@@ -1,6 +1,7 @@
 import torch
 from transformers import GPT2LMHeadModel, GPT2Config
 from typing import Dict
+import subprocess
 
 class GPT2Wrapper(torch.nn.Module):
     def __init__(self, model):
@@ -14,6 +15,8 @@ class GPT2Wrapper(torch.nn.Module):
                             use_cache=True
                             )
         return (output.logits, output.past_key_values, output.hidden_states)
+
+subprocess.call('mkdir -p model', shell=True)
 
 # Load the original model and wrap it
 gpt2 = GPT2LMHeadModel.from_pretrained('gpt2')

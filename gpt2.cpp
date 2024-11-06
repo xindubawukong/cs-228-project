@@ -10,6 +10,10 @@ using namespace std;
 
 using json = nlohmann::json;
 
+struct Matrix {
+  float* data;
+};
+
 /*
 def linear(x, w, b):  # [m, in], [in, out], [out] -> [m, out]
     return x @ w + b
@@ -18,12 +22,15 @@ struct Linear {
   int in, out;
   float* weight;
   float* bias;
+
   Linear(int in_, int out_)
       : in(in_), out(out_), weight(nullptr), bias(nullptr) {}
+
   void LoadParameters(auto& params, std::string prefix) {
     Load(weight, params[prefix + ".weight"], in * out);
     Load(bias, params[prefix + ".bias"], out);
   }
+  void Forward(float* x, float* y) {}
 };
 
 /*
@@ -37,7 +44,9 @@ struct LayerNorm {
   int n_embd;
   float* weight;
   float* bias;
+
   LayerNorm(int n_embd_) : n_embd(n_embd_), weight(nullptr), bias(nullptr) {}
+
   void LoadParameters(auto& params, string prefix) {
     Load(weight, params[prefix + ".weight"], n_embd);
     Load(bias, params[prefix + ".bias"], n_embd);
@@ -73,8 +82,10 @@ struct Attention {
   int n_embd;
   Linear c_attn;
   Linear c_proj;
+
   Attention(int n_embd_)
       : n_embd(n_embd_), c_attn(n_embd, 3 * n_embd), c_proj(n_embd, n_embd) {}
+
   void LoadParameters(auto& params, string prefix) {
     c_attn.LoadParameters(params, prefix + ".c_attn");
     c_proj.LoadParameters(params, prefix + ".c_proj");
@@ -95,8 +106,10 @@ struct MLP {
   int n_embd;
   Linear c_fc;
   Linear c_proj;
+
   MLP(int n_embd_)
       : n_embd(n_embd_), c_fc(n_embd, 4 * n_embd), c_proj(4 * n_embd, n_embd) {}
+
   void LoadParameters(auto& params, string prefix) {
     c_fc.LoadParameters(params, prefix + ".c_fc");
     c_proj.LoadParameters(params, prefix + ".c_proj");
@@ -171,7 +184,7 @@ struct GPT2 {
   }
 
   void LoadParameters(auto& params) {
-    std::cout << "Loading GPT2 parameters" << std::endl;
+    std::cout << "\nLoading GPT2 parameters" << std::endl;
     Load(wte, params["model.transformer.wte.weight"],
          config.vocab_size * config.n_embd);
     Load(wpe, params["model.transformer.wpe.weight"],
@@ -183,7 +196,7 @@ struct GPT2 {
     ln_f.LoadParameters(params, "model.transformer.ln_f");
     Load(lm_head, params["model.lm_head.weight"],
          config.vocab_size * config.n_embd);
-    std::cout << "Successfully loaded GPT2 parameters" << std::endl;
+    std::cout << "Successfully loaded GPT2 parameters\n" << std::endl;
   }
 };
 
@@ -196,6 +209,7 @@ int main() {
   GPT2 gpt2(config);
 
   unordered_map<string, at::Tensor> params;
+  cout << "parameters:" << endl;
   for (const auto& param : gpt2_torch.named_parameters()) {
     std::cout << param.name << ' ' << param.value.sizes() << std::endl;
     params[param.name] = param.value;
@@ -210,10 +224,20 @@ int main() {
   // (logits, past_key_values, hidden_states)
   auto output = gpt2_torch.forward(inputs).toTuple();
 
-  auto t = output->elements()[0].toTensor();
-  cout << t.sizes() << endl;
-  auto x = output->elements()[1].toTuple();
-  cout << x->size() << endl;
+  auto logits = output->elements()[0].toTensor();
+  cout << "logits: " << logits.sizes() << endl;
+  // past_key_values: cached k,v for each layer
+  auto past_key_values = output->elements()[1].toTuple();
+  cout << "past_key_values: " << past_key_values->size() << endl;
+  auto layer0_kv = past_key_values->elements()[0].toTuple();
+  auto layer0_k = layer0_kv->elements()[0].toTensor();
+  // layer0_k is [1, 12, 20, 64] because of multi-head attention
+  cout << "layer0_k: " << layer0_k.sizes() << endl;
+  // hidden_states[0-11] are layer outputs, hidden_states[12] is the output of ln_f
+  auto hidden_states = output->elements()[2].toTuple();
+  cout << "hidden_states: " << hidden_states->size() << endl;
+  auto layer0_output = hidden_states->elements()[0].toTensor();
+  cout << "layer0_output: " << layer0_output.sizes() << endl;
 
   return 0;
 }
