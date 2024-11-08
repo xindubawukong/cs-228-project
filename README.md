@@ -228,6 +228,11 @@ model.transformer.ln_f.bias [768]
 model.lm_head.weight [50257, 768]
 ```
 
+## References
+
+- https://jaykmody.com/blog/gpt-from-scratch
+- https://github.com/karpathy/llm.c
+
 
 <!-- 
 

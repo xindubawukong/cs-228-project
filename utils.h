@@ -1,10 +1,7 @@
 #ifndef UTILS_H_
 #define UTILS_H_
 
-#include <torch/script.h>
-
-#include <string>
-#include <vector>
+#include "torch/script.h"
 
 template <typename T>
 void Load(T*& dst, at::Tensor& tensor, size_t n) {
