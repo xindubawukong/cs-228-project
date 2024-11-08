@@ -2,12 +2,11 @@
 #define GPT2_CONFIG_H_
 
 #include <iostream>
-#include <nlohmann/json.hpp>
 
-using json = nlohmann::json;
+#include "nlohmann/json.hpp"
 
 struct GPT2Config {
-  GPT2Config(json config) {
+  GPT2Config(nlohmann::json config) {
     std::cout << "GPT2 config:" << std::endl
               << std::setw(4) << config << std::endl;
     n_ctx = config["n_ctx"];

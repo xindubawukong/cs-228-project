@@ -1,20 +1,19 @@
 #include "gpt2.h"
 
 #include <iostream>
-#include <nlohmann/json.hpp>
 
 #include "gpt2_config.h"
+#include "nlohmann/json.hpp"
 #include "torch/script.h"
 
 using namespace std;
-
-using json = nlohmann::json;
 
 int main() {
   torch::jit::script::Module gpt2_torch =
       torch::jit::load("../model/gpt2_model.pt");
 
-  GPT2Config config = json::parse(ifstream("../model/gpt2_config.json"));
+  GPT2Config config =
+      nlohmann::json::parse(ifstream("../model/gpt2_config.json"));
 
   GPT2 gpt2(config);
 
